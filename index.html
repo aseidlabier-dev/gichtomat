@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gichtomat</title>
+    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f1f5f9">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Content Area where views are injected/toggled -->
+        <main id="main-content">
+            
+            <!-- 1. HOME VIEW (Ampel & Eingabe) -->
+            <section id="view-home" class="view active">
+                <header class="top-header">
+                    <h1>Gichtomat</h1>
+                    <p>Dein Harnsäuretracker - Leben ohne Anfall</p>
+                </header>
+                <div class="content-pad">
+                    
+                    <!-- Ampel -->
+                    <div class="card traffic-container">
+                        <div class="traffic-light" id="traffic-light-indicator"></div>
+                        <div class="traffic-text"><span id="daily-total-display">0</span> mg</div>
+                        <div class="traffic-limit">Tageslimit: 400 mg Harnsäure</div>
+                    </div>
+
+                    <!-- Eingabe Formular -->
+                    <div class="card mt-4">
+                        <h2><i class="ph ph-bowl-food" style="color: var(--primary); margin-right: 4px;"></i> Mahlzeit hinzufügen</h2>
+                        <form id="add-meal-form">
+                            <div class="input-group">
+                                <label>Lebensmittel suchen</label>
+                                <input type="text" id="food-search" placeholder="z.B. Apfel, Salami..." autocomplete="off">
+                                <div id="suggestions" class="suggestions-box"></div>
+                            </div>
+                            
+                            <!-- Hidden input to store selected food object -->
+                            <input type="hidden" id="selected-food-harnsaeure">
+                            <input type="hidden" id="selected-food-name">
+
+                            <div class="input-group">
+                                <label>Menge in Gramm</label>
+                                <input type="number" id="food-amount" placeholder="z.B. 150" min="1">
+                                <div id="buffer-preview" style="font-size: 0.85rem; margin-top: 4px; display: none;"></div>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 10px 0; color: var(--text-muted); font-size: 0.9em; font-weight: 600;">ODER</div>
+
+                            <div class="input-group">
+                                <label>Mahlzeiten-Vorlage wählen</label>
+                                <select id="home-template-select" style="padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); width: 100%; font-family: inherit; font-size: 1rem; background: var(--bg-light);">
+                                    <option value="">Keine Vorlage (manuelle Eingabe)</option>
+                                    <!-- Options per JS -->
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary">Hinzufügen</button>
+                        </form>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 2. DAILY VIEW -->
+            <section id="view-daily" class="view">
+                <header class="top-header">
+                    <h1>Tagesbereich</h1>
+                    <input type="date" id="current-date-display" style="background: transparent; border: none; color: inherit; font-family: inherit; font-size: 1rem; opacity: 0.8; outline: none; cursor: pointer; margin-top: 5px;">
+                </header>
+                <div class="content-pad">
+                    <div class="card">
+                        <h2><i class="ph ph-note-pencil" style="color: var(--primary); margin-right: 4px;"></i> Tagesnotiz & Tracker</h2>
+                        <div class="input-group">
+                            <label>Optionale Notiz</label>
+                            <input type="text" id="daily-note-input" placeholder="z.B. Geburtstagsfeier, Grillabend..." autocomplete="off">
+                        </div>
+                        <div class="input-group mt-3" style="display: flex; align-items: center; gap: 10px; background: rgba(239,68,68,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.2);">
+                            <input type="checkbox" id="daily-attack" style="width: 24px; height: 24px; cursor:pointer;">
+                            <label for="daily-attack" style="margin-bottom: 0; color: var(--traffic-red); font-weight: 600; cursor:pointer;">💥 Akuter Gichtschub (Heute)</label>
+                        </div>
+                        <div id="attack-details" style="display: none; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-top: none; padding: 12px; border-radius: 0 0 8px 8px; margin-top: -8px; padding-top: 15px;">
+                            <div class="input-group mb-2">
+                                <label style="font-size: 0.85em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Schmerzpunkte (1-10)</span>
+                                    <button type="button" class="btn-secondary" id="add-pain-point-btn" style="padding: 2px 8px; font-size: 0.8em; border-radius: 4px;">+ Hinzufügen</button>
+                                </label>
+                                <div id="pain-points-container" style="display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Dynamic pain points -->
+                                </div>
+                            </div>
+                            <div class="input-group mb-0">
+                                <label style="font-size: 0.85em; margin-bottom: 4px;">Medikament eingenommen?</label>
+                                <input type="text" id="daily-attack-med" placeholder="z.B. Colchicin, Ibuprofen..." style="padding: 8px; font-size: 0.9em; height: 35px;">
+                            </div>
+                            <div class="input-group mb-0 mt-3">
+                                <label style="font-size: 0.85em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Fotos (optional)</span>
+                                    <label for="camera-upload" class="btn-secondary" style="padding: 2px 8px; font-size: 0.8em; border-radius: 4px; cursor: pointer; margin-bottom: 0;">+ Foto</label>
+                                    <input type="file" id="camera-upload" accept="image/*" multiple style="display: none;">
+                                </label>
+                                <div id="photos-container" style="display: flex; gap: 8px; overflow-x: auto; padding-top: 5px; padding-bottom: 5px;">
+                                    <!-- Dynamic photos -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mt-3 mb-0">
+                            <label>Getrunkenes Wasser (ml)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="daily-water" placeholder="z.B. 1500" min="0" style="flex:1;">
+                                <button type="button" class="btn-secondary" onclick="addWater(250)" style="padding: 10px 15px; border-radius: 6px; white-space:nowrap;">+ 250ml</button>
+                                <button type="button" class="btn-secondary" onclick="addWater(500)" style="padding: 10px 15px; border-radius: 6px; white-space:nowrap;">+ 500ml</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-4">
+                        <h2><i class="ph ph-fork-knife" style="color: var(--primary); margin-right: 4px;"></i> Verzehrtes heute</h2>
+                        <div id="daily-list" class="daily-list">
+                            <!-- Items werden per JS hier geladen -->
+                        </div>
+                        <p id="daily-empty-msg" class="text-muted mt-4 text-center">Noch keine Einträge heute.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. STATS VIEW -->
+            <section id="view-stats" class="view">
+                <header class="top-header" style="display:flex; justify-content:space-between; align-items:center; padding-right:15px;">
+                    <div>
+                        <h1>Gesamtstatistik</h1>
+                        <p>Deine Historie</p>
+                    </div>
+                    <button class="btn-secondary print-hide" onclick="printSection('stats')" style="padding: 6px 12px; font-size:0.85em;"><i class="ph ph-printer"></i> Drucken</button>
+                </header>
+                <div class="content-pad">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h2 style="margin: 0;"><i class="ph ph-clock-counter-clockwise" style="color: var(--primary); margin-right: 4px;"></i> Verlauf</h2>
+                            <select id="stats-month-filter" style="padding: 6px; font-size: 0.9em; border-radius: 6px; border: 1px solid var(--glass-border); background: var(--card-bg);"></select>
+                        </div>
+                        <div id="stats-list" class="daily-list">
+                            <!-- History items per JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. TABLE VIEW -->
+            <section id="view-table" class="view">
+                <header class="top-header">
+                    <h1>Datenbank</h1>
+                    <p>Purintabelle durchsuchen & ergänzen</p>
+                </header>
+                <div class="content-pad">
+                    <div class="card mb-4" style="background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2);">
+                        <h2><i class="ph ph-plus-circle" style="color: var(--primary); margin-right: 4px;"></i> Eigenes Lebensmittel eintragen</h2>
+                        <form id="add-custom-food-form">
+                            <div class="input-group">
+                                <label>Name</label>
+                                <input type="text" id="custom-food-name" required placeholder="z.B. Mein Super-Snack" autocomplete="off">
+                            </div>
+                            <div class="input-group">
+                                <label>Kategorie</label>
+                                <input type="text" id="custom-food-cat" required placeholder="z.B. Eigene Lebensmittel" list="category-list">
+                                <datalist id="category-list">
+                                    <!-- Populated by JS -->
+                                </datalist>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label>Harnsäure (mg pro 100g)</label>
+                                <input type="number" id="custom-food-harn" required min="0" placeholder="z.B. 45">
+                            </div>
+                            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);">Speichern</button>
+                        </form>
+                    </div>
+
+                    <div class="input-group" style="display: flex; gap: 10px;">
+                        <input type="text" id="db-search" placeholder="Lebensmittel suchen..." style="flex: 1;">
+                        <select id="db-filter" style="padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-light); max-width: 120px;">
+                            <option value="all">Alle</option>
+                            <option value="custom">Eigene</option>
+                            <option value="templates">Vorlagen</option>
+                        </select>
+                    </div>
+                    <div class="card mt-4" style="padding: 10px; overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="setDbSort('name')" style="cursor:pointer; user-select:none;">Lebensmittel <span id="sort-icon-name"></span></th>
+                                    <th onclick="setDbSort('category')" style="cursor:pointer; user-select:none;">Kategorie <span id="sort-icon-category"></span></th>
+                                    <th onclick="setDbSort('harn')" style="cursor:pointer; user-select:none;">Harnsäure (mg/100g) <span id="sort-icon-harn"></span></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="db-table-body">
+                                <!-- Data rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. INSIGHTS VIEW -->
+            <section id="view-insights" class="view">
+                <header class="top-header">
+                    <h1>Auswertung & Hilfe</h1>
+                    <p>Tipps & Analysen</p>
+                </header>
+                <div class="content-pad">
+                    <!-- Auswertungskarten -->
+                    <div id="insights-container" class="insights-grid">
+                        <!-- Generiert durch JS -->
+                    </div>
+
+                    <div class="card mt-4 mb-4" style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+                        <h2><i class="ph ph-drop" style="color: #38bdf8; margin-right: 4px;"></i> Wasser-Statistik</h2>
+                        <div id="water-stats" style="display: flex; gap: 15px; margin-top: 15px;">
+                            <!-- JS -->
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <h2><i class="ph ph-pizza" style="color: var(--traffic-yellow); margin-right: 4px;"></i> Treiber nach Lebensmittel</h2>
+                        <p class="text-muted" style="margin-bottom: 12px;">Gesamtmenge und Durchschnitt pro Mahlzeit.</p>
+                        <div id="top-foods-list" class="daily-list">
+                            <!-- Ranking per JS -->
+                        </div>
+                    </div>
+
+                    <div class="card mt-4 mb-4">
+                        <h2><i class="ph ph-folders" style="color: var(--primary); margin-right: 4px;"></i> Treiber nach Kategorie</h2>
+                        <div id="top-categories-list" class="daily-list">
+                            <!-- Ranking per JS -->
+                        </div>
+                    </div>
+
+                    <div class="card mt-4 mb-4" style="border: 2px solid rgba(239,68,68,0.3);">
+                        <h2><i class="ph ph-lightning" style="color: var(--traffic-red); margin-right: 4px;"></i> Treiber an Schub-Tagen</h2>
+                        <p class="text-muted" style="margin-bottom: 12px;">Welche Lebensmittel hast du historisch an Tagen gegessen, die als Gichtschub markiert sind?</p>
+                        <div id="attack-foods-list" class="daily-list">
+                            <!-- Ranking per JS -->
+                        </div>
+                    </div>
+
+                    <div class="card mt-4 mb-4" id="card-protocol" style="border: 2px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.02);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2><i class="ph ph-file-text" style="color: var(--traffic-red); margin-right: 4px;"></i> Gichtschub-Protokoll</h2>
+                            <button class="btn-secondary print-hide" onclick="printSection('protocol')" style="padding: 4px 10px; font-size:0.85em;"><i class="ph ph-printer"></i> Drucken</button>
+                        </div>
+                        <p class="text-muted" style="margin-bottom: 12px;">Detaillierte Übersicht aller Tage mit einem akuten Gichtschub.</p>
+                        <div id="attack-protocol-list" class="daily-list">
+                            <!-- Protokoll per JS -->
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+
+            <!-- 6. SETTINGS VIEW -->
+            <section id="view-settings" class="view">
+                <header class="top-header">
+                    <h1>Einstellungen</h1>
+                    <p>Konfiguration & System</p>
+                </header>
+                <div class="content-pad">
+                    <div class="card mb-4 print-hide">
+                        <h2><i class="ph ph-star" style="color: var(--traffic-yellow); margin-right: 4px;"></i> Vorlagen-Manager</h2>
+                        <p class="text-muted" style="margin-bottom: 15px;">Erstelle und verwalte deine Mahlzeiten-Vorlagen.</p>
+                        <form id="template-builder-form">
+                            <input type="hidden" id="edit-template-id" value="">
+                            <div class="input-group">
+                                <label>Name der Vorlage</label>
+                                <input type="text" id="template-name" placeholder="z.B. Mein Frühstück" required autocomplete="off">
+                            </div>
+                            <div class="input-group">
+                                <label>Zutat suchen</label>
+                                <input type="text" id="template-food-search" placeholder="Zutat..." autocomplete="off">
+                                <div id="template-suggestions" class="suggestions-box"></div>
+                            </div>
+                            <input type="hidden" id="template-selected-harnsaeure">
+                            <input type="hidden" id="template-selected-name">
+                            <div class="input-group" style="display: flex; gap: 10px; align-items: flex-end;">
+                                <div style="flex: 1;">
+                                    <label>Menge (g)</label>
+                                    <input type="number" id="template-food-amount" placeholder="z.B. 100" min="1">
+                                </div>
+                                <button type="button" id="btn-add-template-item" class="btn-secondary" style="padding: 10px 15px; border-radius: 8px;">+ Hinzufügen</button>
+                            </div>
+                            
+                            <div id="template-items-list" style="margin: 15px 0; display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--glass-border); padding-top: 15px;">
+                                <p class="text-muted text-center" style="font-size: 0.85em; margin: 0;">Noch keine Zutaten hinzugefügt.</p>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary" style="background: var(--traffic-green);">Vorlage speichern</button>
+                            <button type="button" id="btn-cancel-edit-template" class="btn-secondary mt-2" style="display:none;">Abbrechen</button>
+                        </form>
+                    </div>
+
+                    <div class="card mb-4 print-hide">
+                        <h2><i class="ph ph-sliders" style="color: var(--primary); margin-right: 4px;"></i> App-Konfiguration</h2>
+                        <p class="text-muted" style="margin-bottom: 15px;">Passe die App an und sichere deine Daten.</p>
+                        
+                        <div class="input-group mb-4" style="display: flex; justify-content: space-between; align-items: center;">
+                            <label style="margin: 0; font-weight: 600;">🌙 Dark Mode</label>
+                            <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                                <input type="checkbox" id="theme-toggle" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; box-shadow: inset 0 0 5px rgba(0,0,0,0.2);">
+                                    <span class="slider-knob" style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="btn-export-backup" class="btn-primary" style="flex: 1; background: var(--traffic-green);"><i class="ph ph-download-simple"></i> Backup speichern</button>
+                            <label for="btn-import-backup" class="btn-secondary" style="flex: 1; display:flex; justify-content:center; align-items:center; cursor:pointer; margin:0;"><i class="ph ph-upload-simple"></i> Backup laden</label>
+                            <input type="file" id="btn-import-backup" accept=".json" style="display:none;">
+                        </div>
+                    </div>
+                    
+                    <!-- Footer / Copyright -->
+                    <div style="text-align: center; margin-top: 2rem; padding-bottom: 2rem; opacity: 0.7;">
+                        <img src="logo_schousta.png" alt="Logo" style="width: 80px; height: auto; border-radius: 8px; margin-bottom: 0.5rem;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">copyright by Christian Schuster - 2026 - with Antigravity</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-target="view-home">
+                <i class="ph ph-house"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-target="view-daily">
+                <i class="ph ph-calendar-check"></i>
+                <span>Tag</span>
+            </button>
+            <button class="nav-item" data-target="view-stats">
+                <i class="ph ph-chart-line-up"></i>
+                <span>Stats</span>
+            </button>
+            <button class="nav-item" data-target="view-insights">
+                <i class="ph ph-lightbulb"></i>
+                <span>Ausw.</span>
+            </button>
+            <button class="nav-item" data-target="view-table">
+                <i class="ph ph-list-magnifying-glass"></i>
+                <span>Lebensm.</span>
+            </button>
+            <button class="nav-item" data-target="view-settings">
+                <i class="ph ph-gear"></i>
+                <span>Einst.</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Lade Daten und App-Logik -->
+    <script src="data_v3.js?v=4"></script>
+    <script src="app_v9.js?v=1"></script>
+
+    <!-- Service Worker Registrierung (PWA) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, err => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
+</body>
+</html>

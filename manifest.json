@@ -1,0 +1,23 @@
+{
+  "name": "Gichtomat",
+  "short_name": "Gichtomat",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Dein lokaler Begleiter für die Aufzeichnung von Gicht-Attacken und mehr.",
+  "icons": [
+    {
+      "src": "logo_schousta.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo_schousta.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

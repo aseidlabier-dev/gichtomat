@@ -538,6 +538,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.deleteDailyDay = () => {
+        const today = getTodayKey();
+        if(!dailyLog[today]) return;
+        if(!confirm(`Möchtest du den gesamten Tag (${today}) wirklich mit allen Einträgen löschen?`)) return;
+        delete dailyLog[today];
+        saveLog();
+        renderDailyView();
+        updateTrafficLight();
+        if(typeof renderStatsView === 'function') renderStatsView();
+    };
+
     window.deleteDailyItem = (id) => {
         if(!confirm('Eintrag wirklich löschen?')) return;
         const today = getTodayKey();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gichtomat-cache-v1';
+const CACHE_NAME = 'gichtomat-cache-v2';
 const urlsToCache = [
   './',
   './index.html',

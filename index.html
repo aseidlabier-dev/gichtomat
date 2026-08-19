@@ -73,9 +73,12 @@
 
             <!-- 2. DAILY VIEW -->
             <section id="view-daily" class="view">
-                <header class="top-header">
-                    <h1>Tagesbereich</h1>
-                    <input type="date" id="current-date-display" style="background: transparent; border: none; color: inherit; font-family: inherit; font-size: 1rem; opacity: 0.8; outline: none; cursor: pointer; margin-top: 5px;">
+                <header class="top-header" style="display:flex; justify-content:space-between; align-items:center; padding-right:15px;">
+                    <div>
+                        <h1>Tagesbereich</h1>
+                        <input type="date" id="current-date-display" style="background: transparent; border: none; color: inherit; font-family: inherit; font-size: 1rem; opacity: 0.8; outline: none; cursor: pointer; margin-top: 5px;">
+                    </div>
+                    <button class="btn-secondary print-hide" onclick="deleteDailyDay()" style="padding: 6px 12px; font-size:0.85em; background: rgba(239,68,68,0.1); color: var(--traffic-red); border-color: rgba(239,68,68,0.2);" title="Tag löschen"><i class="ph ph-trash"></i> Löschen</button>
                 </header>
                 <div class="content-pad">
                     <div class="card">
